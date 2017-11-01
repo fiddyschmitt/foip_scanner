@@ -13,6 +13,7 @@ namespace foip
         static void Main(string[] args)
         {
             var options = new CLI.Options();
+
             if (CommandLine.Parser.Default.ParseArguments(args, options))
             {
                 ScanOptions scanOptions = new ScanOptions(options);
