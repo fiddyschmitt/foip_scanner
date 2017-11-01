@@ -25,11 +25,6 @@ namespace foip
 
                 Console.WriteLine(duration.ToFriendlyDisplay(3));
             }
-
-            
-
-            Console.WriteLine("Finished. Please press any key to continue...");
-            Console.ReadKey();
         }
     }
 }
