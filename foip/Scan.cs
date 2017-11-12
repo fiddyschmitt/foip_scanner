@@ -116,34 +116,42 @@ namespace foip
                                 string fqdnPlaceholder = "{" + Fields.FQDN.ToString().ToUpper() + "}";
                                 if (result.Contains(fqdnPlaceholder))
                                 {
+                                    string fqdn = ep.Address.ToString();
+
                                     try
                                     {
                                         IPHostEntry entry = Dns.GetHostEntry(ep.Address);
                                         if (entry != null)
                                         {
-                                            result = result.Replace(fqdnPlaceholder, entry.HostName);
+                                            fqdn = entry.HostName;
                                         }
                                     }
                                     catch (SocketException ex)
                                     {
                                     }
+
+                                    result = result.Replace(fqdnPlaceholder, fqdn);
                                 }
 
                                 string hostnamePlaceholder = "{" + Fields.Hostname.ToString().ToUpper() + "}";
                                 if (result.Contains(hostnamePlaceholder))
                                 {
+                                    string hostname = ep.Address.ToString();
+
                                     try
                                     {
                                         IPHostEntry entry = Dns.GetHostEntry(ep.Address);
                                         if (entry != null)
                                         {
                                             string fullName = entry.HostName;
-                                            result = result.Replace(hostnamePlaceholder, fullName.Substring(0, fullName.IndexOf('.')));
+                                            hostname = fullName.Substring(0, fullName.IndexOf('.'));
                                         }
                                     }
                                     catch (SocketException ex)
                                     {
-                                    }  
+                                    }
+
+                                    result = result.Replace(hostnamePlaceholder, hostname);
                                 }
 
                                 result = result.Replace("{" + Fields.IP.ToString().ToUpper() + "}", ep.Address.ToString());
