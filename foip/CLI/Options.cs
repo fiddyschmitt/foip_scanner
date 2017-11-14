@@ -51,6 +51,9 @@ namespace foip.CLI
         [Option('t', "timeout", Required = false, HelpText = "Connection timeout (in milliseconds)", DefaultValue = 1000)]
         public int TimeoutMilliseconds { get; set; }
 
+        [Option('m', "max-retries", Required = false, HelpText = "Number of times to retry connecting to a port", DefaultValue = 10)]
+        public int RetryCount { get; set; }
+
         [Option('r', "randomize", Required = false, HelpText = "Randomize the order in which hosts and ports are scanned", DefaultValue = false)]
         public bool Randomize { get; set; }
 

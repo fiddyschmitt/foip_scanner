@@ -96,106 +96,136 @@ namespace foip
             var tasks = new List<Task>();
             foreach (var ep in endpoints)
             {
+                if (ep.Address.ToString().EndsWith(".255"))
+                {
+                    //skip these
+                    continue;
+                }
+
                 semaphore.WaitOne();
 
                 //Console.WriteLine(ep);
                 var task = Task.Factory.StartNew(() =>
                 {
-                    //Console.WriteLine(ep);
-                    using (TcpClient client = new TcpClient())
+                    try
                     {
-                        try
+                        //Console.WriteLine(ep);
+
+                        int connectionAttempts = 0;
+
+                        while (connectionAttempts <= Options.RawOptions.RetryCount)
                         {
-                            if (client.ConnectAsync(ep.Address, ep.Port).Wait(Options.RawOptions.TimeoutMilliseconds))
+                            using (TcpClient client = new TcpClient())
                             {
-                                //Console.WriteLine(ep);
-
-                                string result = Options.RawOptions.Format;
-                                result = result.Replace("{" + Fields.Date.ToString().ToUpper() + "}", DateTime.Now.ToString());
-
-                                string fqdnPlaceholder = "{" + Fields.FQDN.ToString().ToUpper() + "}";
-                                if (result.Contains(fqdnPlaceholder))
+                                try
                                 {
-                                    string fqdn = ep.Address.ToString();
-
-                                    try
+                                    if (client.ConnectAsync(ep.Address, ep.Port).Wait(Options.RawOptions.TimeoutMilliseconds))
                                     {
-                                        IPHostEntry entry = Dns.GetHostEntry(ep.Address);
-                                        if (entry != null)
+                                        //Console.WriteLine(ep);
+
+                                        string result = Options.RawOptions.Format;
+                                        result = result.Replace("{" + Fields.Date.ToString().ToUpper() + "}", DateTime.Now.ToString());
+
+                                        string fqdnPlaceholder = "{" + Fields.FQDN.ToString().ToUpper() + "}";
+                                        if (result.Contains(fqdnPlaceholder))
                                         {
-                                            fqdn = entry.HostName;
+                                            string fqdn = ep.Address.ToString();
+
+                                            try
+                                            {
+                                                IPHostEntry entry = Dns.GetHostEntry(ep.Address);
+                                                if (entry != null)
+                                                {
+                                                    fqdn = entry.HostName;
+                                                }
+                                            }
+                                            catch (SocketException ex)
+                                            {
+                                            }
+
+                                            result = result.Replace(fqdnPlaceholder, fqdn);
                                         }
-                                    }
-                                    catch (SocketException ex)
-                                    {
-                                    }
 
-                                    result = result.Replace(fqdnPlaceholder, fqdn);
-                                }
-
-                                string hostnamePlaceholder = "{" + Fields.Hostname.ToString().ToUpper() + "}";
-                                if (result.Contains(hostnamePlaceholder))
-                                {
-                                    string hostname = ep.Address.ToString();
-
-                                    try
-                                    {
-                                        IPHostEntry entry = Dns.GetHostEntry(ep.Address);
-                                        if (entry != null)
+                                        string hostnamePlaceholder = "{" + Fields.Hostname.ToString().ToUpper() + "}";
+                                        if (result.Contains(hostnamePlaceholder))
                                         {
-                                            string fullName = entry.HostName;
-                                            hostname = fullName.Substring(0, fullName.IndexOf('.'));
+                                            string hostname = ep.Address.ToString();
+
+                                            try
+                                            {
+                                                IPHostEntry entry = Dns.GetHostEntry(ep.Address);
+                                                if (entry != null)
+                                                {
+                                                    string fullName = entry.HostName;
+                                                    hostname = fullName.Substring(0, fullName.IndexOf('.'));
+                                                }
+                                            }
+                                            catch (SocketException ex)
+                                            {
+                                            }
+
+                                            result = result.Replace(hostnamePlaceholder, hostname);
                                         }
+
+                                        result = result.Replace("{" + Fields.IP.ToString().ToUpper() + "}", ep.Address.ToString());
+                                        result = result.Replace("{" + Fields.Port.ToString().ToUpper() + "}", ep.Port.ToString());
+
+                                        string schemePlaceholder = "{" + Fields.Scheme.ToString().ToUpper() + "}";
+                                        if (result.Contains(schemePlaceholder))
+                                        {
+                                            //TODO: Consider deducing the scheme using a more definitive approach. Perhaps inspect the connection contents.
+
+                                            string scheme;
+
+                                            switch (ep.Port)
+                                            {
+                                                case 80:
+                                                    scheme = "http";
+                                                    break;
+
+                                                case 443:
+                                                    scheme = "https";
+                                                    break;
+
+                                                default:
+                                                    scheme = "ipv4";
+                                                    break;
+                                            }
+
+                                            result = result.Replace(schemePlaceholder, scheme);
+                                        }
+
+                                        Console.WriteLine(result);
+
+                                        break; //connected successfully; we can stop retrying
                                     }
-                                    catch (SocketException ex)
+                                    else
                                     {
+                                        //the connection timed out. It could be because the machine was too busy. Let's retry
                                     }
-
-                                    result = result.Replace(hostnamePlaceholder, hostname);
                                 }
-
-                                result = result.Replace("{" + Fields.IP.ToString().ToUpper() + "}", ep.Address.ToString());
-                                result = result.Replace("{" + Fields.Port.ToString().ToUpper() + "}", ep.Port.ToString());
-
-                                string schemePlaceholder = "{" + Fields.Scheme.ToString().ToUpper() + "}";
-                                if (result.Contains(schemePlaceholder))
+                                catch (Exception ex)
                                 {
-                                    //TODO: Consider deducing the scheme using a more definitive approach. Perhaps inspect the connection contents.
-
-                                    string scheme;
-
-                                    switch (ep.Port)
+                                    if (ex.ToString().Contains("actively refused"))
                                     {
-                                        case 80:
-                                            scheme = "http";
-                                            break;
-
-                                        case 443:
-                                            scheme = "https";
-                                            break;
-
-                                        default:
-                                            scheme = "ipv4";
-                                            break;
+                                        //the machine said nothing is running on that port. Don't retry
+                                        break;
                                     }
-
-                                    result = result.Replace(schemePlaceholder, scheme);
+                                    else
+                                    {
+                                        //Console.WriteLine(ex);
+                                    }
                                 }
-
-                                Console.WriteLine(result);
                             }
-                            else
-                            {
 
-                            }
+                            connectionAttempts++;
                         }
-                        catch (Exception ex)
-                        {
-                            //Console.WriteLine(ex);
-                        }
+
                     }
-
-                    semaphore.Release();
+                    finally
+                    {
+                        semaphore.Release();
+                    }
                 }, TaskCreationOptions.LongRunning);
 
                 tasks.Add(task);
