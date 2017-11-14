@@ -7,10 +7,6 @@ Usage:
 
     foip.exe -i "192.168.1.1" -p "80, 443"
 
-//Scan a range of hosts
-
-    foip.exe -i "192.168.1.1-192.168.1.255" -p "80, 443"
-
 //Scan a range of hosts for a range of ports
 
     foip.exe -i "192.168.1.1-192.168.1.255" -p "1-8000"
