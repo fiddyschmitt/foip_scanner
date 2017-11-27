@@ -21,7 +21,7 @@ Usage:
 
 //Order the output of the program
 ```
-    foip.exe -i "192.168.1.1-192.168.1.255" -p "1-8000" --order-by "{IP} asc, {PORT} desc"
+foip.exe -i "192.168.1.1-192.168.1.255" -p "1-8000" --order-by "{IP} asc, {PORT} desc"
 ```
     
  Will sort the results first by IP ascending, then by port descending. Sample output:
