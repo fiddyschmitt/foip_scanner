@@ -71,6 +71,8 @@
     <Compile Include="Extensions.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Result.cs" />
+    <Compile Include="ResultList.cs" />
     <Compile Include="Scan.cs" />
   </ItemGroup>
   <ItemGroup>

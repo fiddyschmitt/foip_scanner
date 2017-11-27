@@ -60,6 +60,12 @@ namespace foip.CLI
         [Option('f', "format", Required = false, HelpText = "{FORMAT_FIELD_HELP}", DefaultValue = "{IP}:{PORT}")]
         public string Format { get; set; }
 
+        [Option("order-by", Required = false, HelpText = "{ORDER_FIELD_HELP}")]
+        public string OrderBy { get; set; }
+
+        [Option('o', "output-file", Required = false, HelpText = "The filename to save results into")]
+        public string OutputFilename { get; set; }
+
         //[Option('o', "output", Required = false, HelpText = "The format of the output", DefaultValue = OutputType.Plaintext)]
         //public OutputType OutputType;
 
@@ -72,6 +78,7 @@ namespace foip.CLI
             result = result.Replace("{IP_FIELD_HELP}", GetIPFieldHelp());
             result = result.Replace("{PORTS_FIELD_HELP}", GetPortsFieldHelp());
             result = result.Replace("{FORMAT_FIELD_HELP}", GetFormatFieldHelp());
+            result = result.Replace("{ORDER_FIELD_HELP}", GetOrderFieldHelp());
 
             return result;
         }
@@ -134,6 +141,29 @@ namespace foip.CLI
                 FieldsAsString(string.Format("{0}{1,40}", Environment.NewLine, " ")));
 
             return formatFieldHelp;
+        }
+
+        public static string GetOrderFieldHelp()
+        {
+            string result = string.Format(
+@"The order to use for the output file.
+
+{0,30}This sort order:
+{0,40}{{IP}} asc, {{PORT}} desc
+                    
+{0,30}Will sort the results first by IP ascending, then by port descending. Sample output:
+{0,40}192.168.1.1:443
+{0,40}192.168.1.1:80
+{0,40}192.168.1.2:443
+{0,40}192.168.1.2:80
+
+{0,30}Valid fields are:
+{0,40}{1}",
+                " ",
+                FieldsAsString(string.Format("{0}{1,40}", Environment.NewLine, " "))
+                );
+
+            return result;
         }
 
         public static string FieldsAsString(string separator)

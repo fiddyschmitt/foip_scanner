@@ -1,6 +1,8 @@
 ﻿using foip.CLI;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.Sockets;
@@ -94,6 +96,7 @@ namespace foip
             var semaphore = new Semaphore(Options.RawOptions.MaxSimultaneousConnections, Options.RawOptions.MaxSimultaneousConnections);
 
             var tasks = new List<Task>();
+            var allResults = new ResultList(Options.RawOptions.OrderBy);
             foreach (var ep in endpoints)
             {
                 if (ep.Address.ToString().EndsWith(".255"))
@@ -121,81 +124,26 @@ namespace foip
                                 {
                                     if (client.ConnectAsync(ep.Address, ep.Port).Wait(Options.RawOptions.TimeoutMilliseconds))
                                     {
-                                        //Console.WriteLine(ep);
+                                        Result hit = new Result(Options, ep, DateTime.Now);
 
-                                        string result = Options.RawOptions.Format;
-                                        result = result.Replace("{" + Fields.Date.ToString().ToUpper() + "}", DateTime.Now.ToString());
+                                        string hitStr = hit.ToFormattedString();
+                                        Console.WriteLine(hitStr);
 
-                                        string fqdnPlaceholder = "{" + Fields.FQDN.ToString().ToUpper() + "}";
-                                        if (result.Contains(fqdnPlaceholder))
+                                        lock (allResults)
                                         {
-                                            string fqdn = ep.Address.ToString();
+                                            allResults.Add(hit);
 
-                                            try
+                                            if (!string.IsNullOrEmpty(Options.RawOptions.OutputFilename))
                                             {
-                                                IPHostEntry entry = Dns.GetHostEntry(ep.Address);
-                                                if (entry != null)
-                                                {
-                                                    fqdn = entry.HostName;
-                                                }
+                                                var sortedResults = allResults.OrderAsRequested();
+
+                                                var outputText = sortedResults
+                                                    .Select(or => or.ToFormattedString())
+                                                    .ToList();
+
+                                                File.WriteAllLines(Options.RawOptions.OutputFilename, outputText);
                                             }
-                                            catch (SocketException ex)
-                                            {
-                                            }
-
-                                            result = result.Replace(fqdnPlaceholder, fqdn);
-                                        }
-
-                                        string hostnamePlaceholder = "{" + Fields.Hostname.ToString().ToUpper() + "}";
-                                        if (result.Contains(hostnamePlaceholder))
-                                        {
-                                            string hostname = ep.Address.ToString();
-
-                                            try
-                                            {
-                                                IPHostEntry entry = Dns.GetHostEntry(ep.Address);
-                                                if (entry != null)
-                                                {
-                                                    string fullName = entry.HostName;
-                                                    hostname = fullName.Substring(0, fullName.IndexOf('.'));
-                                                }
-                                            }
-                                            catch (SocketException ex)
-                                            {
-                                            }
-
-                                            result = result.Replace(hostnamePlaceholder, hostname);
-                                        }
-
-                                        result = result.Replace("{" + Fields.IP.ToString().ToUpper() + "}", ep.Address.ToString());
-                                        result = result.Replace("{" + Fields.Port.ToString().ToUpper() + "}", ep.Port.ToString());
-
-                                        string schemePlaceholder = "{" + Fields.Scheme.ToString().ToUpper() + "}";
-                                        if (result.Contains(schemePlaceholder))
-                                        {
-                                            //TODO: Consider deducing the scheme using a more definitive approach. Perhaps inspect the connection contents.
-
-                                            string scheme;
-
-                                            switch (ep.Port)
-                                            {
-                                                case 80:
-                                                    scheme = "http";
-                                                    break;
-
-                                                case 443:
-                                                    scheme = "https";
-                                                    break;
-
-                                                default:
-                                                    scheme = "ipv4";
-                                                    break;
-                                            }
-
-                                            result = result.Replace(schemePlaceholder, scheme);
-                                        }
-
-                                        Console.WriteLine(result);
+                                        }                           
 
                                         break; //connected successfully; we can stop retrying
                                     }
@@ -213,7 +161,7 @@ namespace foip
                                     }
                                     else
                                     {
-                                        //Console.WriteLine(ex);
+                                        Debug.WriteLine(ex);
                                     }
                                 }
                             }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Text;
@@ -72,5 +73,64 @@ namespace foip
             var attributes = memInfo[0].GetCustomAttributes(typeof(T), false);
             return (attributes.Length > 0) ? (T)attributes[0] : null;
         }
+
+        public static IOrderedEnumerable<TSource> PerformSort<TSource, TResult>(Object sourceList, Func<TSource, TResult> selector, ListSortDirection direction)
+        {
+            IOrderedEnumerable<TSource> orderedEnumerable = sourceList as IOrderedEnumerable<TSource>;
+            if (orderedEnumerable != null)
+            {
+                if (direction == ListSortDirection.Ascending)
+                {
+                    return orderedEnumerable.ThenBy(selector);
+                }
+                else
+                {
+                    return orderedEnumerable.ThenByDescending(selector);
+                }
+            }
+
+            IEnumerable<TSource> enumerable = sourceList as IEnumerable<TSource>;
+            if (enumerable != null)
+            {
+                if (direction == ListSortDirection.Ascending)
+                {
+                    return enumerable.OrderBy(selector);
+                }
+                else
+                {
+                    return enumerable.OrderByDescending(selector);
+                }
+            }
+
+            return null;
+        }
+
+        /*
+        public static IOrderedEnumerable<TSource> OrderBy<TSource, TResult>(this IOrderedEnumerable<TSource> sourceList, Func<TSource, TResult> selector, ListSortDirection direction, bool isFirst)
+        {
+            if (isFirst)
+            {
+                if (direction == ListSortDirection.Ascending)
+                {
+                    return sourceList.OrderBy(selector);
+                }
+                else
+                {
+                    return sourceList.OrderByDescending(selector);
+                }
+            }
+            else
+            {
+                if (direction == ListSortDirection.Ascending)
+                {
+                    return sourceList.ThenBy(selector);
+                }
+                else
+                {
+                    return sourceList.ThenByDescending(selector);
+                }
+            }
+        }
+        */
     }
 }

@@ -26,6 +26,7 @@ namespace foip
 
                 Console.WriteLine(duration.ToFriendlyDisplay(3));
             }
+
         }
     }
 }
