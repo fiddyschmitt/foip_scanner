@@ -95,7 +95,7 @@ namespace foip
         public string ToFormattedString()
         {
             string result = Options.RawOptions.Format;
-            //result = result.Replace("{" + Fields.Date.ToString().ToUpper() + "}", this.Date);
+            result = result.Replace("{" + Fields.Date.ToString().ToUpper() + "}", this.Date.ToString());
 
             string fqdnPlaceholder = "{" + Fields.FQDN.ToString().ToUpper() + "}";
             if (result.Contains(fqdnPlaceholder))
