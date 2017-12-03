@@ -69,6 +69,7 @@
     <Compile Include="CLI\Options.cs" />
     <Compile Include="CLI\ScanOptions.cs" />
     <Compile Include="Extensions.cs" />
+    <Compile Include="Logger.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Result.cs" />

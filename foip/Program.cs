@@ -19,12 +19,7 @@ namespace foip
                 ScanOptions scanOptions = new ScanOptions(options);
 
                 Scan scan = new Scan(scanOptions);
-
-                DateTime startTime = DateTime.Now;
                 scan.Start();
-                TimeSpan duration = DateTime.Now - startTime;
-
-                Console.WriteLine(duration.ToFriendlyDisplay(3));
             }
 
         }

@@ -57,6 +57,9 @@ namespace foip.CLI
         [Option('r', "randomize", Required = false, HelpText = "Randomize the order in which hosts and ports are scanned", DefaultValue = false)]
         public bool Randomize { get; set; }
 
+        [Option('s', "show-progress", Required = false, HelpText = "Shows progress through the scan", DefaultValue = true)]
+        public bool ShowProgress { get; set; }
+
         [Option('f', "format", Required = false, HelpText = "{FORMAT_FIELD_HELP}", DefaultValue = "{IP}:{PORT}")]
         public string Format { get; set; }
 

@@ -47,7 +47,7 @@ namespace foip.CLI
 
                         if (m.Success)
                         {
-                            //Console.WriteLine(m.Groups[1].Value.Trim() + " -> " + m.Groups[2].Value.Trim());
+                            //Logger.WriteLine(m.Groups[1].Value.Trim() + " -> " + m.Groups[2].Value.Trim());
 
                             IPAddress fromIP = IPAddress.Parse(m.Groups[1].Value.Trim());
                             IPAddress toIP = IPAddress.Parse(m.Groups[2].Value.Trim());
@@ -89,7 +89,7 @@ namespace foip.CLI
 
                         if (m.Success)
                         {
-                            //Console.WriteLine(m.Groups[1].Value.Trim() + " -> " + m.Groups[2].Value.Trim());
+                            //Logger.WriteLine(m.Groups[1].Value.Trim() + " -> " + m.Groups[2].Value.Trim());
 
                             int startPort = int.Parse(m.Groups[1].Value.Trim());
                             int endPort = int.Parse(m.Groups[2].Value.Trim());
@@ -108,13 +108,13 @@ namespace foip.CLI
 
             //foreach (var ip in Addresses)
             {
-                //Console.WriteLine("\t" + ip.ToString());
+                //Logger.WriteLine("\t" + ip.ToString());
             }
-            //Addresses. ToList().ForEach(ip => Console.WriteLine("\t" + ip.ToString()));
+            //Addresses. ToList().ForEach(ip => Logger.WriteLine("\t" + ip.ToString()));
 
             Ports = ExtractPorts(options.PortsToScan);
             this.RawOptions = options;
-            //Ports.ToList().ForEach(port => Console.WriteLine("\t" + port.ToString()));
+            //Ports.ToList().ForEach(port => Logger.WriteLine("\t" + port.ToString()));
         }
 
         public long TotalEndpoints

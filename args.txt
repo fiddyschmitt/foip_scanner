@@ -1,4 +1,7 @@
 -i "192.168.1.1 - 192.168.1.255" -p "21, 22, 80, 443, 3389" -f "{FQDN}, {HOSTNAME}:{PORT}, {IP}:{PORT}"
--i "192.168.1.1 - 192.168.1.255" -p "21, 22, 80, 443, 3389" -f "{FQDN}, {HOSTNAME}:{PORT}, {IP}:{PORT}" -o output.txt
 -i "192.168.1.1 - 192.168.1.255" -p "21, 22, 80, 443, 3389" -f "{FQDN}, {HOSTNAME}:{PORT}, {IP}:{PORT}" --order-by "{IP} asc, {PORT} desc"
 -i "192.168.1.1 - 192.168.1.255" -p "21, 22, 80, 443, 3389" -f "{FQDN}, {HOSTNAME}:{PORT}, {IP}:{PORT}" --order-by "{IP} asc, {PORT} desc" -o output.txt
+
+-i "192.168.1.1 - 192.168.1.255" -p "21, 22, 80, 443, 3389" -f "{FQDN}, {HOSTNAME}:{PORT}, {IP}:{PORT}" -o output.txt
+
+-i "192.168.1.1 - 192.168.1.254" -p "1-65535" -f "{IP}:{PORT}"
